@@ -1,0 +1,112 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/MethodCall.gd" type="Script" id=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Input" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="FileNameInput" type="Node" parent="Input"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Input/FileNameInput"]
+margin_left = 50.0
+margin_top = 25.0
+margin_right = 200.0
+margin_bottom = 38.7401
+text = "File Name:"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="Input/FileNameInput"]
+margin_left = 50.0
+margin_top = 50.7937
+margin_right = 200.0
+margin_bottom = 100.794
+text = "Enter the full file name with extension."
+wrap_enabled = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EncryptionInput" type="Node" parent="Input"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Input/EncryptionInput"]
+margin_left = 250.0
+margin_top = 25.0
+margin_right = 400.0
+margin_bottom = 38.7401
+text = "File Encryption:"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckButton" type="CheckButton" parent="Input/EncryptionInput"]
+margin_left = 250.0
+margin_top = 50.0
+margin_right = 400.0
+margin_bottom = 90.0
+text = "Encryption"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CompressionModeInput" type="Node" parent="Input"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Input/CompressionModeInput"]
+margin_left = 450.0
+margin_top = 25.0
+margin_right = 600.0
+margin_bottom = 38.7401
+text = "File Compression:"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OptionButton" type="OptionButton" parent="Input/CompressionModeInput"]
+margin_left = 450.0
+margin_top = 50.0
+text = "Compression Mode"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FileContentInput" type="Node" parent="Input"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Input/FileContentInput"]
+margin_left = 650.0
+margin_top = 25.0
+margin_right = 800.0
+margin_bottom = 38.7401
+text = "File Content::"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="Input/FileContentInput"]
+margin_left = 650.0
+margin_top = 50.7937
+margin_right = 800.0
+margin_bottom = 100.794
+text = "Enter the wanted file content."
+wrap_enabled = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="Input"]
+margin_left = 250.0
+margin_top = 150.0
+margin_right = 350.0
+margin_bottom = 150.0
+text = "Submit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Input/Button" to="Input" method="_on_Button_pressed"]
