@@ -214,4 +214,3 @@ else:
 
 **When to use it:**
 When you want to delete a file and unregister it from the environment, if it is for example no longer needed.
-# Godot-Data-Manager-GDM
