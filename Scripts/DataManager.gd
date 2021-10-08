@@ -20,10 +20,9 @@ func create_new_file(file_name : String, content := "", directory_path := "user:
         err = ERR_FILE_BAD_PATH
         return err
     var file_hash := ""
-    # Add data of the newly created file to the dictionary.
-    var file_data := FileData.new(file_path, file_hash, encryption, compression);
-    _add_to_dictionary(file_name, file_data)
-    err = _check_file(file_path)
+    # Add data of the newly created file to a file data instance.
+    var file_data := FileData.new(file_path, file_hash, encryption, compression)
+    err = _check_file(file_path)[1]
     if (err != OK):
         return err
     if (encryption && compression >= 0):
@@ -33,6 +32,8 @@ func create_new_file(file_name : String, content := "", directory_path := "user:
     # Check if the file should be hashed.
     if (hashing):
         file_data.set_file_hash(_get_file_hash(file_path))
+    # Add file data instance to the dictionary, after the hash has been updated if needed.
+    _add_to_dictionary(file_name, file_data)
     return err
 
 # Returns the text from the given file. Returns an empty string,
@@ -49,7 +50,7 @@ func read_from_file(file_name : String) -> Array:
         return [content, err]
     # Check if hashing is enabled and we therefore saved the latest hash in file_data.
     # Check if the hash is still the same or if it was changed.
-    if (file_data.get_file_hash() != "" && !compare_hash(file_name)):
+    if (file_data.get_file_hash() != "" && !compare_hash(file_name)[0]):
         # If it was don't read our given content from the file.
         err = ERR_FILE_CORRUPT
         return [content, err]
@@ -93,7 +94,7 @@ func change_file_path(file_name : String, directory_path : String) -> int:
     var name = file_data.get_file_path().split("/")[-1]
     var file_path = directory_path + name
     # Check if the file exists already at the given path.
-    err = _check_file(file_path)
+    err = _check_file(file_path)[1]
     if (err != OK):
         return err
     # Move the file to its new location and adjust the file_path to the new value.
@@ -158,27 +159,26 @@ func compare_hash(file_name : String) -> Array:
 
 # Deletes the given file and unregisters it.
 # file_name (String): Name of the given file that should be deleted.
-func delete_file(file_name : String) -> Array:
+func delete_file(file_name : String) -> int:
     var err := OK
-    var success := false
     var result := _get_file_data(file_name)
     var file_data = result[0]
     err = result[1]
     if (err != OK):
-        return [success, err]
-    err = _check_file(file_data.get_file_path(), true)
+        return err
+    err = _check_file(file_data.get_file_path(), true)[1]
     if (err != OK):
-        return [success, err]
+        return err
     var dir := Directory.new()
     err = dir.remove(file_data.get_file_path())
     if (err != OK):
-        return [success, err]
+        return err
     err = dir.remove(FILEDATA_DICTIONARY + file_name + FILEDATA_FILE)
     if (err != OK):
-        return [success, err]
-    success = _remove_from_dictionary(file_name)
+        return err
+    err = _remove_from_dictionary(file_name)
     _update_file_names()
-    return [success, err]
+    return err
 
 #-----------------------------------------------------------------------------
 # Private
@@ -240,7 +240,8 @@ class FileData:
 # Called when the game is started.
 func _ready() -> void:
     # Check if there has been a previous game session, with saved game files.
-    if (!_check_file(DICTIONARY_KEY_FILE, true)):
+    var file_exists = _check_file(DICTIONARY_KEY_FILE, true)[0]
+    if (not file_exists):
         # If there wasn't we need to create the file initially.
         _update_file_names()
     else:
@@ -259,7 +260,7 @@ func _get_file_data(file_name : String) -> Array:
 
 # Checks if the file at the given location exists and returns an error,
 # if the expected result is different then the actual result.
-func _check_file(file_path : String, file_exists := false) -> int:
+func _check_file(file_path : String, file_exists := false) -> Array:
     var err := OK
     var file := File.new()
     var result := file.file_exists(file_path)
@@ -269,7 +270,7 @@ func _check_file(file_path : String, file_exists := false) -> int:
             err = ERR_ALREADY_EXISTS
         else:
             err = ERR_DOES_NOT_EXIST
-    return err
+    return [result, err]
 
 # Add the given FileData to the dictionary, where the value is the FileData and the key is our file name
 func _add_to_dictionary(file_name : String, file_data : FileData) -> void:
@@ -278,11 +279,15 @@ func _add_to_dictionary(file_name : String, file_data : FileData) -> void:
     _update_file_names()
 
 # Removes the entry from our dictonary with the given key.
-func _remove_from_dictionary(file_name : String) -> bool:
+func _remove_from_dictionary(file_name : String) -> int:
+    var err := OK
     # Remove the data from the dictionary.
     var success := _file_dictionary.erase(file_name)
+    if (not success):
+        err = ERR_CANT_RESOLVE
+        return err
     _update_file_names()
-    return success
+    return err
 
 # Updates the save file that contains our dictionary data.
 func _update_file_names() -> void:
