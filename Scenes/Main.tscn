@@ -3,9 +3,9 @@
 [ext_resource path="res://Scripts/MethodCall.gd" type="Script" id=2]
 
 [node name="Node2D" type="Node2D"]
+script = ExtResource( 2 )
 
 [node name="Input" type="Node" parent="."]
-script = ExtResource( 2 )
 
 [node name="FileNameInput" type="Node" parent="Input"]
 
@@ -82,16 +82,16 @@ margin_left = 650.0
 margin_top = 25.0
 margin_right = 800.0
 margin_bottom = 38.7401
-text = "File Content::"
+text = "File Content:"
 scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="TextEdit" type="TextEdit" parent="Input/FileContentInput"]
-margin_left = 650.0
+margin_left = 651.0
 margin_top = 50.7937
-margin_right = 800.0
+margin_right = 801.0
 margin_bottom = 100.794
 text = "Enter the wanted file content."
 wrap_enabled = true
@@ -99,14 +99,128 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Button" type="Button" parent="Input"]
-margin_left = 250.0
-margin_top = 150.0
-margin_right = 350.0
-margin_bottom = 150.0
-text = "Submit"
+[node name="FilePathInput" type="Node" parent="Input"]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Input/FilePathInput"]
+margin_left = 850.0
+margin_top = 25.0
+margin_right = 1000.0
+margin_bottom = 38.7401
+text = "File Path:"
+scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="Input/Button" to="Input" method="_on_Button_pressed"]
+[node name="TextEdit" type="TextEdit" parent="Input/FilePathInput"]
+margin_left = 850.0
+margin_top = 50.7937
+margin_right = 1000.0
+margin_bottom = 100.794
+text = "Enter the wanted file path."
+wrap_enabled = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Buttons" type="Node" parent="."]
+
+[node name="CreateFile" type="Button" parent="Buttons"]
+margin_left = 50.0
+margin_top = 150.0
+margin_right = 150.0
+margin_bottom = 175.0
+text = "Create File"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ReadFile" type="Button" parent="Buttons"]
+margin_left = 180.0
+margin_top = 150.0
+margin_right = 280.0
+margin_bottom = 175.0
+text = "Read File"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="DeleteFile" type="Button" parent="Buttons"]
+margin_left = 310.0
+margin_top = 150.0
+margin_right = 410.0
+margin_bottom = 175.0
+text = "Delete File"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ChangeFilePath" type="Button" parent="Buttons"]
+margin_left = 440.0
+margin_top = 150.0
+margin_right = 540.0
+margin_bottom = 175.0
+text = "Change Path"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="UpdateFile" type="Button" parent="Buttons"]
+margin_left = 570.0
+margin_top = 150.0
+margin_right = 670.0
+margin_bottom = 175.0
+text = "Update File"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="AppendFile" type="Button" parent="Buttons"]
+margin_left = 700.0
+margin_top = 150.0
+margin_right = 800.0
+margin_bottom = 175.0
+text = "Append File"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="CompareHash" type="Button" parent="Buttons"]
+margin_left = 830.0
+margin_top = 150.0
+margin_right = 935.0
+margin_bottom = 175.0
+text = "Compare Hash"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="Output" type="Node" parent="."]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Output"]
+margin_left = 475.0
+margin_top = 230.0
+margin_right = 525.0
+margin_bottom = 250.0
+text = "Output:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="Output"]
+margin_left = 25.0
+margin_top = 250.309
+margin_right = 1000.0
+margin_bottom = 575.0
+readonly = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Buttons/CreateFile" to="." method="_on_CreateFile_pressed"]
+[connection signal="pressed" from="Buttons/ReadFile" to="." method="_on_ReadFile_pressed"]
+[connection signal="pressed" from="Buttons/DeleteFile" to="." method="_on_DeleteFile_pressed"]
+[connection signal="pressed" from="Buttons/ChangeFilePath" to="." method="_on_ChangeFilePath_pressed"]
+[connection signal="pressed" from="Buttons/UpdateFile" to="." method="_on_UpdateFile_pressed"]
+[connection signal="pressed" from="Buttons/AppendFile" to="." method="_on_AppendFile_pressed"]
+[connection signal="pressed" from="Buttons/CompareHash" to="." method="_on_CompareHash_pressed"]
