@@ -1,6 +1,7 @@
 extends Node
 
-# Creates and registers a new file with the given properties abd writes the given text to it.
+# Creates and registers a new file with the given properties, writes the given text to it
+# and returns an integer representing the GlobalScope Error Enum, showing wheter and how creating the file failed.
 # file_name (String): Name the given file should have (is used as the ID so make sure it's unique)
 # content (String): Inital data that should be saved into the file.
 # directory_path (String): Directory the file shoukd be saved into.
@@ -22,7 +23,7 @@ func create_new_file(file_name : String, content := "", directory_path := "user:
     var file_hash := ""
     # Add data of the newly created file to a file data instance.
     var file_data := FileData.new(file_path, file_hash, encryption, compression)
-    err = _check_file(file_path)[1]
+    err = _check_file_not_exists(file_path).get_error()
     if (err != OK):
         return err
     if (encryption && compression >= 0):
@@ -40,35 +41,26 @@ func create_new_file(file_name : String, content := "", directory_path := "user:
 # when the file is nto yet registered or when the hash is not as expected,
 # if hashing is enabled for the given file.
 # file_name (String): Name of the given file that should be read from.
-func read_from_file(file_name : String) -> Array:
-    var err := OK
-    var content = ""
-    var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
-    if (err != OK):
-        return [content, err]
+func read_from_file(file_name : String) -> ValueError:
+    var value_error := ValueError.new("", OK)
+    value_error.set_data(_get_file_data(file_name))
+    if (value_error.get_error() != OK):
+        return value_error
     # Check if hashing is enabled and we therefore saved the latest hash in file_data.
     # Check if the hash is still the same or if it was changed.
-    if (file_data.get_file_hash() != "" && !compare_hash(file_name)[0]):
+    if (value_error.get_value().get_file_hash() != "" && !compare_hash(file_name).get_value()):
         # If it was don't read our given content from the file.
-        err = ERR_FILE_CORRUPT
-        return [content, err]
+        value_error.set_error(ERR_FILE_CORRUPT)
+        return value_error
     # Check if the file should be only encrypted.
-    if (file_data.get_file_key()):
-        result = _read_from_encrypted_file(file_data.get_file_path(), File.READ)
-        content = result[0]
-        err = result[1]
+    if (value_error.get_value().get_file_key()):
+        value_error.set_data(_read_from_encrypted_file(value_error.get_value().get_file_path(), File.READ))
     # Check if the file should be only compressed.
-    elif (file_data.get_file_compression() >= 0):
-        result = _read_from_compressed_file(file_data, File.READ)
-        content = result[0]
-        err = result[1]
+    elif (value_error.get_value().get_file_compression() >= 0):
+        value_error.set_data(_read_from_compressed_file(value_error.get_value(), File.READ))
     else:
-        result = _read_from_file(file_data.get_file_path(), File.READ)
-        content = result[0]
-        err = result[1]
-    return [content, err]
+        value_error.set_data(_read_from_file(value_error.get_value().get_file_path(), File.READ))
+    return value_error
 
 # Changes the file location of the given file to the new directory and
 # returns true if it succeeded.
@@ -80,8 +72,8 @@ func change_file_path(file_name : String, directory_path : String) -> int:
     if directory_path[-1] != '/':
         directory_path += '/'
     var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
+    var file_data = result.get_value()
+    err = result.get_error()
     if (err != OK):
         return err
     # Check if the given path exists.
@@ -94,7 +86,7 @@ func change_file_path(file_name : String, directory_path : String) -> int:
     var name = file_data.get_file_path().split("/")[-1]
     var file_path = directory_path + name
     # Check if the file exists already at the given path.
-    err = _check_file(file_path)[1]
+    err = _check_file_not_exists(file_path).get_error()
     if (err != OK):
         return err
     # Move the file to its new location and adjust the file_path to the new value.
@@ -111,8 +103,8 @@ func change_file_path(file_name : String, directory_path : String) -> int:
 func update_file_content(file_name : String, content : String) -> int:
     var err := OK
     var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
+    var file_data = result.get_value()
+    err = result.get_error()
     if (err != OK):
         return err
     err = _detect_write_mode(file_data, content, File.WRITE)
@@ -126,8 +118,8 @@ func update_file_content(file_name : String, content : String) -> int:
 func append_file_content(file_name : String, content : String) -> int:
     var err := OK
     var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
+    var file_data = result.get_value()
+    err = result.get_error()
     if (err != OK):
         return err
     # Check if hashing is enabled and we therefore saved the latest hash in file_data.
@@ -142,31 +134,28 @@ func append_file_content(file_name : String, content : String) -> int:
 # Compares the current hash with the last expected hash
 # and returns true if it is the same and false if it isn't.
 # file_name (String): Name of the given file that should have its hash checked.
-func compare_hash(file_name : String) -> Array:
-    var err := OK
-    var success := false
-    var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
-    if (err != OK):
-        return [success, err]
-    elif (file_data.get_file_hash() == ""):
-        err = ERR_FILE_MISSING_DEPENDENCIES
-        return [success, err]
-    var current_hash := _get_file_hash(file_data.get_file_path())
-    success = current_hash == file_data.get_file_hash()
-    return [success, err]
+func compare_hash(file_name : String) -> ValueError:
+    var value_error := ValueError.new(false, OK)
+    value_error.set_data(_get_file_data(file_name))
+    if (value_error.get_error() != OK):
+        return value_error
+    elif (value_error.get_value().get_file_hash() == ""):
+        value_error.set_error(ERR_FILE_MISSING_DEPENDENCIES)
+        return value_error
+    var current_hash := _get_file_hash(value_error.get_value().get_file_path())
+    value_error.set_value(current_hash == value_error.get_value().get_file_hash())
+    return value_error
 
 # Deletes the given file and unregisters it.
 # file_name (String): Name of the given file that should be deleted.
 func delete_file(file_name : String) -> int:
     var err := OK
     var result := _get_file_data(file_name)
-    var file_data = result[0]
-    err = result[1]
+    var file_data = result.get_value()
+    err = result.get_error()
     if (err != OK):
         return err
-    err = _check_file(file_data.get_file_path(), true)[1]
+    #value_error.set_error(_check_file_exists(value_error.get_value().get_file_path())
     if (err != OK):
         return err
     var dir := Directory.new()
@@ -190,6 +179,36 @@ const FILEDATA_FILE := "_file_data.save"
 const FILE_KEY := "ja9tEHvXzvJcwDOiwQoI"
 
 var _file_dictionary  := Dictionary()
+
+# Contains the return value of a given function as well as the error the function returned
+class ValueError:
+    var _value
+    var _err := OK
+
+    # Getter for the value.
+    func get_value():
+        return _value
+
+    # Setter for the value.
+    func set_value(value) -> void:
+        _value = value
+
+    # Getter for the error.
+    func get_error() -> int:
+        return _err
+
+    # Setter for the error.
+    func set_error(err : int) -> void:
+        _err = err
+
+    func set_data(value_error : ValueError) -> void:
+        _value = value_error.get_value()
+        _err = value_error.get_error()
+
+    # Constructor for the ValueError class.
+    func _init(value, err : int):
+        _value = value
+        _err = err
 
 # Contains information needed to reload and reaccess the file after the game session has been reset.
 class FileData:
@@ -240,8 +259,7 @@ class FileData:
 # Called when the game is started.
 func _ready() -> void:
     # Check if there has been a previous game session, with saved game files.
-    var file_exists = _check_file(DICTIONARY_KEY_FILE, true)[0]
-    if (not file_exists):
+    if (!_check_file_exists(DICTIONARY_KEY_FILE).get_value()):
         # If there wasn't we need to create the file initially.
         _update_file_names()
     else:
@@ -249,28 +267,38 @@ func _ready() -> void:
         # into our dictionary.
         _load_file_names()
 
-# Gets the FileData object from the given file name otu of our dictionary.
-func _get_file_data(file_name : String) -> Array:
-    var err := OK
-    var file_data = _file_dictionary.get(file_name)
+# Gets the FileData object from the given file name out of our dictionary.
+func _get_file_data(file_name : String) -> ValueError:
+    var value_error := ValueError.new(null, OK)
+    value_error.set_value(_file_dictionary.get(file_name))
     # Check if the key existed and we succesfully got the value.
-    if (file_data == null || !file_data is FileData):
-        err = ERR_FILE_UNRECOGNIZED
-    return [file_data, err]
+    if (value_error.get_value() == null || !value_error.get_value() is FileData):
+        value_error.set_error(ERR_FILE_UNRECOGNIZED)
+    return value_error
 
 # Checks if the file at the given location exists and returns an error,
-# if the expected result is different then the actual result.
-func _check_file(file_path : String, file_exists := false) -> Array:
-    var err := OK
+# if there isn't already a file at the given location.
+func _check_file_exists(file_path : String) -> ValueError:
+    var value_error := ValueError.new(false, OK)
     var file := File.new()
-    var result := file.file_exists(file_path)
+    value_error.set_value(file.file_exists(file_path))
     file.close()
-    if (result != file_exists):
-        if (result):
-            err = ERR_ALREADY_EXISTS
-        else:
-            err = ERR_DOES_NOT_EXIST
-    return [result, err]
+    # Check if the file doesn't exist
+    if (!value_error.get_value()):
+        value_error.set_error(ERR_DOES_NOT_EXIST)
+    return value_error
+
+# Checks if the file at the given location doesn't exist and returns an error,
+# if there already is a file at the given location.
+func _check_file_not_exists(file_path : String) -> ValueError:
+    var value_error := ValueError.new(false, OK)
+    var file := File.new()
+    value_error.set_value(file.file_exists(file_path))
+    file.close()
+    # Check if the file doesn't exist
+    if (value_error.get_value()):
+        value_error.set_error(ERR_ALREADY_EXISTS)
+    return value_error
 
 # Add the given FileData to the dictionary, where the value is the FileData and the key is our file name
 func _add_to_dictionary(file_name : String, file_data : FileData) -> void:
@@ -411,37 +439,34 @@ func _write_to_encrypted_file(content : String, file_path : String, file_mode : 
     return err
 
 # Simply reads the content from the given file.
-func _read_from_file(file_path : String, file_mode : int) -> Array:
-    var err := OK
-    var content = ""
+func _read_from_file(file_path : String, file_mode : int) -> ValueError:
+    var value_error := ValueError.new("", OK)
     var file = File.new()
-    err = file.open(file_path, file_mode)
-    if (err != OK):
-        return [content, err]
-    content = file.get_as_text()
+    value_error.set_error(file.open(file_path, file_mode))
+    if (value_error.set_error != OK):
+        return value_error
+    value_error.set_value(file.get_as_text())
     file.close()
-    return [content, err]
+    return value_error
 
 # Reads the content from the given compressed file.
-func _read_from_compressed_file(file_data : FileData, file_mode : int) -> Array:
-    var err := OK
-    var content = ""
+func _read_from_compressed_file(file_data : FileData, file_mode : int) -> ValueError:
+    var value_error := ValueError.new("", OK)
     var file = File.new()
-    err = file.open_compressed(file_data.get_file_path(), file_mode, file_data.get_file_compression())
-    if (err != OK):
-        return [content, err]
-    content = file.get_as_text()
+    value_error.set_error(file.open_compressed(file_data.get_file_path(), file_mode, file_data.get_file_compression()))
+    if (value_error.get_error() != OK):
+        return value_error
+    value_error.set_value(file.get_as_text())
     file.close()
-    return [content, err]
+    return value_error
 
 # Reads the content from the given encrypted file.
-func _read_from_encrypted_file(file_path : String, file_mode : int) -> Array:
-    var err := OK
-    var content = ""
+func _read_from_encrypted_file(file_path : String, file_mode : int) -> ValueError:
+    var value_error := ValueError.new("", OK)
     var file = File.new()
-    err = file.open_encrypted_with_pass(file_path, file_mode, FILE_KEY)
-    if (err != OK):
-        return [content, err]
-    content = file.get_as_text()
+    value_error.set_error(file.open_encrypted_with_pass(file_path, file_mode, FILE_KEY))
+    if (value_error.get_error() != OK):
+        return value_error
+    value_error.set_value(file.get_as_text())
     file.close()
-    return [content, err]
+    return value_error
