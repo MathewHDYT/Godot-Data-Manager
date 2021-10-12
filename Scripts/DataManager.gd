@@ -1,7 +1,8 @@
 extends Node
 
 # Creates and registers a new file with the given properties, writes the given text to it
-# and returns an integer representing the GlobalScope Error Enum, showing wheter and how creating the file failed.
+# and returns an integer representing the GlobalScope Error Enum, 
+# showing wheter and how creating the file failed.
 # file_name (String): Name the given file should have (is used as the ID so make sure it's unique)
 # content (String): Inital data that should be saved into the file.
 # directory_path (String): Directory the file shoukd be saved into.
@@ -37,9 +38,12 @@ func create_new_file(file_name : String, content := "", directory_path := "user:
     _add_to_dictionary(file_name, file_data)
     return err
 
-# Returns the text from the given file. Returns an empty string,
-# when the file is nto yet registered or when the hash is not as expected,
-# if hashing is enabled for the given file.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the text from the given file, that is an empty string,
+# when the file is not yet registered or when the hash is not as expected,
+# if hashing is enabled for the given file
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how reading the file failed.
 # file_name (String): Name of the given file that should be read from.
 func read_from_file(file_name : String) -> ValueError:
     var value_error := ValueError.new("", OK)
@@ -62,8 +66,9 @@ func read_from_file(file_name : String) -> ValueError:
         value_error.set_data(_read_from_file(value_error.get_value().get_file_path(), File.READ))
     return value_error
 
-# Changes the file location of the given file to the new directory and
-# returns true if it succeeded.
+# Changes the file location of the given file to the new directory
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how changing the file path failed.
 # file_name (String): Name of the given file that should be moved.
 # directory_path (String): New directory the given file should be moved too.
 func change_file_path(file_name : String, directory_path : String) -> int:
@@ -96,8 +101,9 @@ func change_file_path(file_name : String, directory_path : String) -> int:
     file_data.set_file_path(file_path)
     return err
 
-# Updates the content of the given file, completly replacing the current content and
-# returning true if succesful and false if not.
+# Updates the content of the given file, completly replacing the current content
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how replacing the file content failed.
 # file_name (String): Name of the given file that should have its content replaced.
 # content (String): Data that should be saved into the file.
 func update_file_content(file_name : String, content : String) -> int:
@@ -110,9 +116,9 @@ func update_file_content(file_name : String, content : String) -> int:
     err = _detect_write_mode(file_data, content, File.WRITE)
     return err
 
-# Appends the content to the given file, keeping the current content and
-# returning true if succesful and false if not. Will not be executed and return false,
-# if hashing is enabled and the hash of the file has changed still we last changed it ourselves.
+# Appends the content to the given file, keeping the current content
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how appending to the file content failed.
 # file_name (String): Name of the given file that should have the content appended.
 # content (String): Data that should be appended to the file.
 func append_file_content(file_name : String, content : String) -> int:
@@ -132,7 +138,10 @@ func append_file_content(file_name : String, content : String) -> int:
     return err
 
 # Compares the current hash with the last expected hash
-# and returns true if it is the same and false if it isn't.
+# and returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the bool deciding wheter the given has been changed  or not
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how reading the file failed.
 # file_name (String): Name of the given file that should have its hash checked.
 func compare_hash(file_name : String) -> ValueError:
     var value_error := ValueError.new(false, OK)
@@ -146,7 +155,9 @@ func compare_hash(file_name : String) -> ValueError:
     value_error.set_value(current_hash == value_error.get_value().get_file_hash())
     return value_error
 
-# Deletes the given file and unregisters it.
+# Deletes the given file and unregisters it
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how deleting the file failed.
 # file_name (String): Name of the given file that should be deleted.
 func delete_file(file_name : String) -> int:
     var err := OK
@@ -206,7 +217,7 @@ class ValueError:
         _err = value_error.get_error()
 
     # Constructor for the ValueError class.
-    func _init(value, err : int):
+    func _init(value, err : int) -> void:
         _value = value
         _err = err
 
@@ -250,7 +261,7 @@ class FileData:
         _file_compression = file_compression
 
     # Constructor for the FileData class.
-    func _init(file_path : String, file_hash : String, file_key : bool, file_compression : int):
+    func _init(file_path : String, file_hash : String, file_key : bool, file_compression : int) -> void:
         _file_path = file_path
         _file_hash = file_hash
         _file_key = file_key
@@ -267,7 +278,10 @@ func _ready() -> void:
         # into our dictionary.
         _load_file_names()
 
-# Gets the FileData object from the given file name out of our dictionary.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the FileData object from the given file name out of our dictionary
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how getting the FileData object failed.
 func _get_file_data(file_name : String) -> ValueError:
     var value_error := ValueError.new(null, OK)
     value_error.set_value(_file_dictionary.get(file_name))
@@ -276,8 +290,10 @@ func _get_file_data(file_name : String) -> ValueError:
         value_error.set_error(ERR_FILE_UNRECOGNIZED)
     return value_error
 
-# Checks if the file at the given location exists and returns an error,
-# if there isn't already a file at the given location.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the bool deciding wheter a file actually exists at the given location
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter the file exists or not at the given location.
 func _check_file_exists(file_path : String) -> ValueError:
     var value_error := ValueError.new(false, OK)
     var file := File.new()
@@ -288,8 +304,10 @@ func _check_file_exists(file_path : String) -> ValueError:
         value_error.set_error(ERR_DOES_NOT_EXIST)
     return value_error
 
-# Checks if the file at the given location doesn't exist and returns an error,
-# if there already is a file at the given location.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the bool deciding wheter a file doesn't already exists at the given location
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter the file doesn't already exist at the given location.
 func _check_file_not_exists(file_path : String) -> ValueError:
     var value_error := ValueError.new(false, OK)
     var file := File.new()
@@ -306,7 +324,9 @@ func _add_to_dictionary(file_name : String, file_data : FileData) -> void:
     _file_dictionary[file_name] = file_data
     _update_file_names()
 
-# Removes the entry from our dictonary with the given key.
+# Removes the entry from our dictonary with the given key
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter deleting the entry from the dictionary failed or not,
 func _remove_from_dictionary(file_name : String) -> int:
     var err := OK
     # Remove the data from the dictionary.
@@ -374,14 +394,16 @@ func _load_file_names() -> void:
         var file_data := FileData.new(file_path, file_hash, file_key, file_compression)
         _add_to_dictionary(key, file_data)
 
-# Gets the file hash from the path of the given file.
+# Returns the file hash from the given file at the given location.
 func _get_file_hash(file_path : String) -> String:
     var file = File.new()
     var file_hash = file.get_sha256(file_path)
     file.close()
     return file_hash
 
-# Detects in which mode the file should be edited in.
+# Detects in which mode the file should be edited in
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how writing to the file failed.
 func _detect_write_mode(file_data : FileData, content : String, file_mode : int) -> int:
     var err := OK
     # Check if encryption is enabled.
@@ -396,7 +418,9 @@ func _detect_write_mode(file_data : FileData, content : String, file_mode : int)
         file_data.set_file_hash(_get_file_hash(file_data.get_file_path()))
     return err
 
-# Simply writes the given content to the given file.
+# Simply writes the given content to the given file
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how writing to the file failed.
 func _write_to_file(content : String, file_path : String, file_mode : int) -> int:
     var file = File.new()
     var err = file.open(file_path, file_mode)
@@ -410,7 +434,9 @@ func _write_to_file(content : String, file_path : String, file_mode : int) -> in
     file.close()
     return err
 
-# Writes the given content to the given file and compressed it with the given compression algorithm.
+# Writes the given content to the given file and compressed it with the given compression algorithm
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how writing to the file failed.
 func _write_to_compressed_file(content : String, file_data : FileData, file_mode : int) -> int:
     var file = File.new()
     var err = file.open_compressed(file_data.get_file_path(), file_mode, file_data.get_file_compression())
@@ -424,7 +450,9 @@ func _write_to_compressed_file(content : String, file_data : FileData, file_mode
     file.close()
     return err
 
-# Writes the given content to the given file and encrypts it.
+# Writes the given content to the given file and encrypts it
+# and returns an integer representing the GlobalScope Error Enum,
+# showing wheter and how writing to the file failed.
 func _write_to_encrypted_file(content : String, file_path : String, file_mode : int) -> int:
     var file = File.new()
     var err = file.open_encrypted_with_pass(file_path, file_mode, FILE_KEY)
@@ -438,7 +466,10 @@ func _write_to_encrypted_file(content : String, file_path : String, file_mode : 
     file.close()
     return err
 
-# Simply reads the content from the given file.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the content from the given file
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how reading from the file failed.
 func _read_from_file(file_path : String, file_mode : int) -> ValueError:
     var value_error := ValueError.new("", OK)
     var file = File.new()
@@ -449,7 +480,10 @@ func _read_from_file(file_path : String, file_mode : int) -> ValueError:
     file.close()
     return value_error
 
-# Reads the content from the given compressed file.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the decompressed content from the given file
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how reading from the compressed file failed.
 func _read_from_compressed_file(file_data : FileData, file_mode : int) -> ValueError:
     var value_error := ValueError.new("", OK)
     var file = File.new()
@@ -460,7 +494,10 @@ func _read_from_compressed_file(file_data : FileData, file_mode : int) -> ValueE
     file.close()
     return value_error
 
-# Reads the content from the given encrypted file.
+# Returns an instance of the ValueError class, where the value (gettable with get_value()),
+# is the encrypted content from the given file
+# and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
+# showing wheter and how reading from the encrypted file failed.
 func _read_from_encrypted_file(file_path : String, file_mode : int) -> ValueError:
     var value_error := ValueError.new("", OK)
     var file = File.new()
