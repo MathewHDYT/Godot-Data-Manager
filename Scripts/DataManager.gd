@@ -141,7 +141,7 @@ func append_file_content(file_name : String, content : String) -> int:
 # and returns an instance of the ValueError class, where the value (gettable with get_value()),
 # is the bool deciding wheter the given has been changed  or not
 # and where the error (gettable with get_error()) is an integer representing the GlobalScope Error Enum,
-# showing wheter and how reading the file failed.
+# showing wheter the file has been changed or not.
 # file_name (String): Name of the given file that should have its hash checked.
 func compare_hash(file_name : String) -> ValueError:
     var value_error := ValueError.new(false, OK)
