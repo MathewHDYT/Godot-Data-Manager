@@ -23,7 +23,7 @@ Used to create, manage and load data via. files on the system easily and permane
   	- [Change File Path method](#change-file-path-method)
   	- [Update File Content method](#update-file-content-method)
   	- [Append File Content method](#append-file-content-method)
-  	- [Check File Hash method](#check-file-hash-method)
+  	- [Compare Hash method](#compare-hash-method)
   	- [Delete File method](#delete-file-method)
 
 ## Introduction
@@ -35,7 +35,7 @@ A lot of games need to save data between multiple game runs, this small and easi
 - Change the file path of a registered file (see [Change File Path method](#change-file-path-method))
 - Change all the content inside of a registered file (see [Update File Content method](#update-file-content-method))
 - Append content to a registered file (see [Append File Content method](#append-file-content-method))
-- Check the file hash of a registered file (see [Check File Hash method](#check-file-hash-method))
+- Compare the file hash of a registered file with the expected hash (see [Compare Hash method](#compare-hash-method))
 - Delete a registered file and unregister it (see [Delete File method](#delete-file-method))
 
 For each method there is a description on how to call it and how to use it correctly for your game in the given section.
@@ -103,20 +103,22 @@ var file_ending := ".txt"
 var encryption := false
 var hashing := false
 var compression := File.COMPRESSION_GZIP
-if (DataManager.create_new_file(file_name, content, directory_path, file_ending, encryption, hashing, compression)):
-	print("Creating the new file called: " + file_name + " was succesfull")
+var err := DataManager.create_new_file(file_name, content, directory_path, file_ending, encryption, hashing, compression)
+if (err != OK):
+    print("Creating file failed with error id: ", err)
 else:
-	print("Creating the new file called: " + file_name + " failed")
+    print("Creating file succesfull")
 ```
 
 Alternatively you can call the methods with less paramters as some of them have default arguments.
 
 ```gdscript
 var file_name := "save"
-if (DataManager.create_new_file(file_name)):
-	print("Creating the new file called: " + file_name + " was succesfull")
+var err := DataManager.create_new_file(file_name)
+if (err != OK):
+    print("Creating file failed with error id: ", err)
 else:
-	print("Creating the new file called: " + file_name + " failed")
+    print("Creating file succesfull")
 ```
 
 **When to use it:**
@@ -131,7 +133,13 @@ Returns an instance of the ValueError class, where the value (gettable with ```g
 
 ```gdscript
 var file_name := "save"
-DataManager.read_from_file(file_name)
+var result := DataManager.read_from_file(file_name)
+print(result.get_value())
+var err := result.get_error()
+if (err != OK):
+    print("Reading file failed with error id: ", err)
+else:
+    print("Reading file succesfull")
 ```
 
 **When to use it:**
@@ -148,10 +156,11 @@ Changes the file location of the given file to the new directory and returns an 
 ```gdscript
 var file_name := "save"
 var directory := "user://"
-if (DataManager.change_file_path(file_name, directory)):
-	print("Moving the file to the new directory: " + directory + " was succesfull")
+var err := DataManager.change_file_path(file_name, directory)
+if (err != OK):
+    print("Moving file failed with error id: ", err)
 else:
-	print("Moving the file to the new directory: " + directory + " failed")
+    print("Moving file succesfull")
 ```
 
 **When to use it:**
@@ -168,10 +177,11 @@ Updates the content of the given file, completly replacing the current content a
 ```gdscript
 var file_name := "save"
 var content := "Example"
-if (DataManager.update_file_content(file_name, content)):
-    print("Updating the file to the new content: " + content + " was succesfull")
+var err := DataManager.update_file_content(file_name, content)
+if (err != OK):
+    print("Updating file content failed with error id: ", err)
 else:
-    print("Updating the file to the new content: " + content + " failed")
+    print("Updating file content succesfull")
 ```
 
 **When to use it:**
@@ -188,16 +198,17 @@ Appends the content to the given file, keeping the current content and returns a
 ```gdscript
 var file_name := "save"
 var content := "Example"
-if (DataManager.append_file_content(file_name, content)):
-    print("Appending the content: " + content + " to the file was succesfull")
+var err := DataManager.append_file_content(file_name, content)
+if (err != OK):
+    print("Appending file content failed with error id: ", err)
 else:
-    print("Appending the content: " + content + " to the file failed")
+    print("Appending file content succesfull")
 ```
 
 **When to use it:**
 When you want to append the given content the current content of a registered file, so that the old content still stays in the file.
 
-### Check File Hash method
+### Compare Hash method
 **What it does:**
 Compares the current hash with the last expected hash and returns an instance of the ValueError class, where the value (gettable with ```get_value()```), is the bool deciding wheter the given has been changed  or not and where the error (gettable with ```get_error()```) is an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter the file has been changed or not.
 
@@ -206,8 +217,16 @@ Compares the current hash with the last expected hash and returns an instance of
 
 ```gdscript
 var file_name := "save"
-if (not DataManager.check_file_hash(file_name)):
-    print("Given file was changedd outside of the environment since last accesing it")
+var result := DataManager.compare_hash(file_name)
+var same_hash = result.get_value()
+var err := result.get_error()
+if (err != OK):
+    print("Comparing file hash failed with error id: ", err)
+else:
+    if (same_hash):
+        print("Hash is as expected, file has not been changed outside of the environment")
+    else:
+        print("Hash is different than expected, accessing might not be save anymore")
 ```
 
 **When to use it:**
@@ -222,10 +241,11 @@ Deletes the given file and unregisters it and returns an integer representing th
 
 ```gdscript
 var file_name := "save"
-if (DataManager.delete_file(file_name)):
-    print("Deleting the file " + file_name + " was succesfull")
+var err := DataManager.delete_file(file_name)
+if (err != OK):
+    print("Deleting file failed with error id: ", err)
 else:
-    print("Deleting the file " + file_name + " failed")
+    print("Deleting file succesfull")
 ```
 
 **When to use it:**
