@@ -37,8 +37,8 @@ func _on_ReadFile_pressed():
     var splits = _file_name.text.split(".")
     var file_name = splits[0]
     var result := DataManager.read_from_file(file_name)
-    _file_content.text = result[0]
-    var err = result[1]
+    _file_content.text = result.get_value()
+    var err = result.get_error()
     if (err != OK):
         message = "Reading file failed with error message: " + _error_to_message(err)
     else:
@@ -94,8 +94,8 @@ func _on_CompareHash_pressed():
     var splits = _file_name.text.split(".")
     var file_name = splits[0]
     var result := DataManager.compare_hash(file_name)
-    var same_hash = result[0]
-    var err = result[1]
+    var same_hash = result.get_value()
+    var err = result.get_error()
     if (err != OK):
         message = "Comparing file hash failed with error message: " +_error_to_message(err)
     else:
