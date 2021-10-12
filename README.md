@@ -15,9 +15,11 @@ Used to create, manage and load data via. files on the system easily and permane
   - [Installation](#installation)
 - [Documentation](#documentation)
   - [Reference to Data Manager Script](#reference-to-data-manager-script)
+  - [Adding new AutoLoad properties](#adding-new-autoload-properties)
+  - [Possible Errors](#possible-errors)
   - [Public accesible methods](#public-accesible-methods)
   	- [Create New File method](#create-new-file-method)
-  	- [Try Read From File method](#try-read-from-file-method)
+  	- [Read From File method](#read-from-file-method)
   	- [Change File Path method](#change-file-path-method)
   	- [Update File Content method](#update-file-content-method)
   	- [Append File Content method](#append-file-content-method)
@@ -29,7 +31,7 @@ A lot of games need to save data between multiple game runs, this small and easi
 
 **Godot Data Manager implements the following methods consisting of a way to:**
 - Create and register a new file with the Data Manager and the given settings at the given location (see [Create New File method](#create-new-file-method))
-- Read the content of a registered file (see [Try Read From File method](#try-read-from-file-method))
+- Read the content of a registered file (see [Read From File method](#read-from-file-method))
 - Change the file path of a registered file (see [Change File Path method](#change-file-path-method))
 - Change all the content inside of a registered file (see [Update File Content method](#update-file-content-method))
 - Append content to a registered file (see [Append File Content method](#append-file-content-method))
@@ -63,12 +65,26 @@ To add a new ```AutoLoad``` property, you simply need to click the add button an
 
 ![Image of Autoload property](https://image.prntscr.com/image/CscPCmKIREa2D759lnIxhQ.png)
 
+## Possible Errors
+
+| **ID** | **CONSTANT**                  | **MEANING**                                                                                    |
+| -------| ------------------------------| -----------------------------------------------------------------------------------------------|
+| 0      | OK                            | Method succesfully executed                                                                    |
+| 9      | ERR_FILE_BAD_PATH             | Can not both encrypt and compress a file                                                       |
+| 15     | ERR_FILE_UNRECOGNIZED         | File has not been registered with the create file function yet                                 |
+| 16     | ERR_FILE_CORRUPT              | File has been changed outside of the environment, accessing might not be save anymore          |
+| 17     | ERR_FILE_MISSING_DEPENDENCIES | Tried to compare hash, but hasing has not been enabled for the given file                      |
+| 26     | ERR_CANT_RESOLVE              | Could not delete file as the entry does not exists in the dictionary anymore                   |
+| 31     | ERR_INVALID_PARAMETER         | Can not both encrypt and compress a file                                                       |
+| 32     | ERR_ALREADY_EXISTS            | A file already exists at the same path, choose a different name or directory                   |
+| 33     | ERR_DOES_NOT_EXIST            | There is no file with the given name in the given directory, ensure it wasn't moved or deleted |
+
 ## Public accesible methods
 This section explains all public accesible methods, especially what they do, how to call them and when using them might be advantageous instead of other methods. We always assume Data Manager instance has been already referenced in the script. If you haven't done that already see [Reference to Data Manager Script](#reference-to-data-manager-script).
 
 ### Create New File method
 **What it does:**
-Creates and registers a new file with the possible options and content you want to write into that file and retursn true if it succeded.
+Creates and registers a new file with the given properties, writes the given text to it and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how creating the file failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the file we want to register and create
@@ -108,7 +124,7 @@ When you want to register and create a new file with the system so it can be use
 
 ### Read From File method
 **What it does:**
-Reads the content of a registered file and returns it as plain text, returns and empty string if the hash changed outside of the environment, if it was enabled for the given file in the [Create New File method](#create-new-file-method).
+Returns an instance of the ValueError class, where the value (gettable with ```get_value()```), is the text from the given file, that is an empty string, when the file is not yet registered or when the hash is not as expected, if hashing is enabled for the given file in the [Create New File method](#create-new-file-method) and where the error (gettable with ```get_error()```) is an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how reading the file failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to read now
@@ -123,7 +139,7 @@ When you want to read the content of a registered file as long as it wasn't chan
 
 ### Change File Path method
 **What it does:**
-Moves the file location of a registered file to the new directory and returns true if it succeded.
+Changes the file location of the given file to the new directory and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how changing the file path failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to move now
@@ -143,7 +159,7 @@ When you want to move the file location of a registered file.
 
 ### Update File Content method
 **What it does:**
-Replaces all the current content in the registered file with the new given content and returns true if it succeded.
+Updates the content of the given file, completly replacing the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how replacing the file content failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to rewrite the content of
@@ -163,7 +179,7 @@ When you want to replace the current content of a registered file with the newly
 
 ### Append File Content method
 **What it does:**
-Appends the given content to the current content in the registered file and returns true if it succeded.
+Appends the content to the given file, keeping the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how appending to the file content failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to rewrite the content of
@@ -183,7 +199,7 @@ When you want to append the given content the current content of a registered fi
 
 ### Check File Hash method
 **What it does:**
-Compares the current hash of the file with the expected hash we have saved in our environment, should be the hash for the last internal changes (write access). Returns false if hashing was not enabled for the registered file.
+Compares the current hash with the last expected hash and returns an instance of the ValueError class, where the value (gettable with ```get_value()```), is the bool deciding wheter the given has been changed  or not and where the error (gettable with ```get_error()```) is an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter the file has been changed or not.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to check the hash now
@@ -199,7 +215,7 @@ When you want to check if the file was changed outisde of the environment by for
 
 ### Delete File method
 **What it does:**
-Deletes the registered file and unregisters it from the environment and returns true if it succeded.
+Deletes the given file and unregisters it and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how deleting the file failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to delete now
