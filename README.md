@@ -70,7 +70,7 @@ To add a new ```AutoLoad``` property, you simply need to click the add button an
 | **ID** | **CONSTANT**                  | **MEANING**                                                                                    |
 | -------| ------------------------------| -----------------------------------------------------------------------------------------------|
 | 0      | OK                            | Method succesfully executed                                                                    |
-| 9      | ERR_FILE_BAD_PATH             | Given path does not exists in the local system.                                                |
+| 9      | ERR_FILE_BAD_PATH             | Given path does not exists in the local system                                                 |
 | 15     | ERR_FILE_UNRECOGNIZED         | File has not been registered with the create file function yet                                 |
 | 16     | ERR_FILE_CORRUPT              | File has been changed outside of the environment, accessing might not be save anymore          |
 | 17     | ERR_FILE_MISSING_DEPENDENCIES | Tried to compare hash, but hasing has not been enabled for the given file                      |
