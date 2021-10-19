@@ -73,7 +73,7 @@ To add a new ```AutoLoad``` property, you simply need to click the add button an
 | 9      | ERR_FILE_BAD_PATH             | Given path does not exists in the local system                                                 |
 | 15     | ERR_FILE_UNRECOGNIZED         | File has not been registered with the create file function yet                                 |
 | 16     | ERR_FILE_CORRUPT              | File has been changed outside of the environment, accessing might not be save anymore          |
-| 17     | ERR_FILE_MISSING_DEPENDENCIES | Tried to compare hash, but hasing has not been enabled for the given file                      |
+| 17     | ERR_FILE_MISSING_DEPENDENCIES | Tried to compare hash, but hasing has not been enabled for the registered file                 |
 | 26     | ERR_CANT_RESOLVE              | Could not delete file as the entry does not exists in the dictionary anymore                   |
 | 31     | ERR_INVALID_PARAMETER         | Can not both encrypt and compress a file                                                       |
 | 32     | ERR_ALREADY_EXISTS            | A file already exists at the same path, choose a different name or directory                   |
@@ -126,7 +126,7 @@ When you want to register and create a new file with the system so it can be use
 
 ### Read From File method
 **What it does:**
-Returns an instance of the ValueError class, where the value (gettable with ```get_value()```), is the text from the given file, that is an empty string, when the file is not yet registered or when the hash is not as expected, if hashing is enabled for the given file in the [Create New File method](#create-new-file-method) and where the error (gettable with ```get_error()```) is an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how reading the file failed.
+Returns an instance of the ValueError class, where the value (gettable with ```get_value()```), is the text from a registered file, that is an empty string, when the file is not yet registered or when the hash is not as expected, if hashing is enabled for the registered file in the [Create New File method](#create-new-file-method) and where the error (gettable with ```get_error()```) is an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how reading the file failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to read now
@@ -147,7 +147,7 @@ When you want to read the content of a registered file as long as it wasn't chan
 
 ### Change File Path method
 **What it does:**
-Changes the file location of the given file to the new directory and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how changing the file path failed.
+Changes the file location of a registered file to the new directory and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how changing the file path failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to move now
@@ -168,7 +168,7 @@ When you want to move the file location of a registered file.
 
 ### Update File Content method
 **What it does:**
-Updates the content of the given file, completly replacing the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how replacing the file content failed.
+Updates the content of a registered file, completly replacing the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how replacing the file content failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to rewrite the content of
@@ -189,7 +189,7 @@ When you want to replace the current content of a registered file with the newly
 
 ### Append File Content method
 **What it does:**
-Appends the content to the given file, keeping the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how appending to the file content failed.
+Appends the content to a registered file, keeping the current content and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how appending to the file content failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to rewrite the content of
@@ -234,7 +234,7 @@ When you want to check if the file was changed outisde of the environment by for
 
 ### Delete File method
 **What it does:**
-Deletes the given file and unregisters it and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how deleting the file failed.
+Deletes a registered file and unregisters it and returns an integer representing the GlobalScope Error Enum (see [Possible Errors](#possible-errors)), showing wheter and how deleting the file failed.
 
 **How to call it:**
 - ```FileName``` is the name without extension we have given the registered file and want to delete now
