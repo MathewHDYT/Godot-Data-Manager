@@ -474,7 +474,7 @@ func _read_from_file(file_path : String, file_mode : int) -> ValueError:
     var value_error := ValueError.new("", OK)
     var file = File.new()
     value_error.set_error(file.open(file_path, file_mode))
-    if (value_error.set_error != OK):
+    if (value_error.get_error() != OK):
         return value_error
     value_error.set_value(file.get_as_text())
     file.close()
